@@ -1,0 +1,13 @@
+Bootstrap: docker
+From: python:3.13-slim-bookworm
+
+%post
+apt-get update
+apt-get install -y nano git
+pip install cma
+pip install meent
+pip install numpy==2.3.2
+pip install scikit-learn
+pip install matplotlib
+pip install psutil
+pip install mpi4py openmpi
