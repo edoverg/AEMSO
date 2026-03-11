@@ -11,7 +11,6 @@
 #SBATCH --nodelist=runner-01
 
 source aemso_venv/bin/activate
-git clone https://github.com/edoverg/AEMSO
 
 export PMIX_MCA_gds=hash
 
