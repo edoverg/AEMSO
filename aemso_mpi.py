@@ -8,7 +8,7 @@ from core.logging_setup import logger_aemso
 
 if __name__ == "__main__":
     #in CMA-ES, the suggested population size is: 4 + 3ln(n) = 9 for n=7
-    cma_settings = {"cma_max_fun_eval":700,"pop_size":16} 
+    cma_settings = {"cma_max_fun_eval":700,"pop_size":14} 
 
     rcwa_settings = { #define RCWA settings (materials,geometries)
         #PHYSICS PARAMETERS
@@ -25,7 +25,6 @@ if __name__ == "__main__":
     }
     
     cma_logger = cma.CMADataLogger()
-    #initial_guess = np.random.uniform(0,1,6) #generate a random initial guess
     initial_guess = 0.5*np.ones(6) #use middle value as initial guess
     es = cma.CMAEvolutionStrategy(initial_guess, 0.2, {'bounds': [0, 1],'maxfevals': cma_settings["cma_max_fun_eval"],'tolx': 1e-5,'tolfun': -0.95, 'popsize': cma_settings["pop_size"]})
     cma_logger.register(es)
@@ -41,14 +40,12 @@ if __name__ == "__main__":
         #run simulations
         logger_aemso.info("Working on simulations...")
         rcwa_settings_ext = [rcwa_settings]*cma_settings["pop_size"]
-
         #spawn parallel processes to run the RCWA simulations
         #=================
         #===MPI EXECUTOR==
         #=================
         with MPIPoolExecutor() as executor:
             results_array_costfun = list(executor.starmap(run_rcwa,zip(rcwa_settings_ext,geom_to_test),chunksize=4))
-        print("RESULTS: ",results_array_costfun)
         # TELL: give results back to the optimizer
         es.tell(geom_to_test_norm, results_array_costfun)
         
