@@ -76,3 +76,7 @@ At this point one can also tweak the number of tasks and cpus-per-task to observ
 ```
 sbatch launch_job.slurm
 ```
+
+## Results
+As an example, the following image shows the simulation results of a beam deflector optimization.
+![example-beam-deflector-fields](https://github.com/edoverg/AEMSO/blob/main/statistics/aemso_serial_logs_ameso_ncpu_1_result_fields.pdf)
