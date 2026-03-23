@@ -28,7 +28,6 @@ rcwa_settings = { #define RCWA settings (materials,geometries)
         "ucPeriod" : 500, #individual unit-cell period [nm]
         "ucNumber" : 6 #number of unit-cells
 }
-#rcwa_settings_ext = [rcwa_settings]*size
 cma_settings = {"cma_max_fun_eval":700,"pop_size":14} #define CMA-ES settings
 
 #setup the CMA instance
@@ -51,18 +50,10 @@ while not flag:
         #obtain the non-normalized geometries and round to nearest int
         geom_to_test = np.rint(scaler.inverse_transform(geom_to_test_norm))
         geom_to_test_flat = np.rint(scaler.inverse_transform(geom_to_test_norm)).astype(np.int32).flatten()
-        #print(geom_to_test_flat) 
         #split data into chunks
-        
         index_worker = np.int16(geom_to_test_flat.size/size)
-        
         counts = np.array([index_worker]*size,dtype='i')
-        #print("Counts",counts)
         displacements = np.arange(0,geom_to_test_flat.size,index_worker,dtype='i')
-        #print("Displacements",displacements)
-
-        #geom_to_test_chunks = np.array_split(geom_to_test,size)
-        #geom_to_test_chunks = np.array(list(c) for c in geom_to_test_chunks)
         #run simulations    
         logger_aemso.info("Working on simulations...")
 
@@ -75,9 +66,7 @@ while not flag:
 
     comm.Scatterv([geom_to_test_flat,(counts,displacements),MPI.INT],recv_buf,root = 0)
     #reshape array
-    #print("recv_buffer",recv_buf)
     test_this_geom = recv_buf.reshape(-1,rcwa_settings["ucNumber"])
-    #print("Test this geom",test_this_geom)
     results_array_costfun = np.array([run_rcwa(rcwa_settings,geom) for geom in test_this_geom])
     all_results_array_costfun = np.empty(cma_settings["pop_size"])
     
@@ -85,7 +74,6 @@ while not flag:
 
     if rank == 0:
         #TELL: give results back to the cma optimizer
-        #es.tell(geom_to_test_norm, list(itertools.chain.from_iterable(all_results_array_costfun))) 
         es.tell(geom_to_test_norm, all_results_array_costfun)
         cma_logger.add()
         cma_logger.save()
