@@ -36,13 +36,15 @@ es = None
 if rank == 0:
     cma_logger = cma.CMADataLogger()
     initial_guess = 0.5*np.ones(6) #use half-value as initial guess
-    es = cma.CMAEvolutionStrategy(initial_guess, 0.2, {'bounds': [0, 1],'maxfevals': cma_settings["cma_max_fun_eval"],'tolfun': -0.95, 'popsize': cma_settings["pop_size"]})
+    es = cma.CMAEvolutionStrategy(initial_guess, 0.2, {'bounds': [0, 1],'maxfevals': cma_settings["cma_max_fun_eval"],
+                                                       'tolfun': -0.95, 'popsize': cma_settings["pop_size"]})
     cma_logger.register(es)
 
 geom_to_test_chunks = None
 while not flag:
-    if rank == 0:        
-        xlimits = np.array([[20, 450],[20, 450], [20, 450],[20, 450],[20, 450],[20, 450]]) #limits for unit cell's diameters
+    if rank == 0:       
+        #limits for unit cell's diameters 
+        xlimits = np.array([[20, 450],[20, 450], [20, 450],[20, 450],[20, 450],[20, 450]]) 
         scaler = MinMaxScaler() #initialize the scaler
         scaler.fit(xlimits.T)
         geom_to_test_norm = es.ask(cma_settings["pop_size"]) 
@@ -55,7 +57,7 @@ while not flag:
         logger_aemso.info("Working on simulations...")
 
         results_array_costfun = np.zeros(len(geom_to_test)) #initialize an empty array for results
-    
+
     test_this_geom = comm.scatter(geom_to_test_chunks,root = 0)
     results_array_costfun = [run_rcwa(rcwa_settings,geom) for geom in test_this_geom] 
     all_results_array_costfun = comm.gather(results_array_costfun,root=0)

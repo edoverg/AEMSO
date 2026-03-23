@@ -1,6 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name AEMSO
+#SBATCH --nodes 1
 #SBATCH --ntasks 3
 #SBATCH --cpus-per-task 1
 #SBATCH --partition allgroups
@@ -8,7 +9,6 @@
 #SBATCH --mem 8G
 #SBATCH --output output_AEMSO.out
 #SBATCH --error errors_AEMSO.err 
-#SBATCH --nodelist=runner-01
 
 source aemso_venv/bin/activate
 
