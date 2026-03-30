@@ -9,6 +9,7 @@
 #SBATCH --mem 8G
 #SBATCH --output output_AEMSO.out
 #SBATCH --error errors_AEMSO.err 
+#SBATCH --nodelist runner-11
 
 source aemso_venv/bin/activate
 

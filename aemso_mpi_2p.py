@@ -4,7 +4,6 @@ import cma
 from sklearn.preprocessing import MinMaxScaler
 from core.logging_setup import logger_aemso
 from core.rcwa_core import run_rcwa
-import itertools
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
@@ -44,7 +43,7 @@ while not flag:
     if rank == 0:       
         #limits for unit cell's diameters 
         xlimits = np.array([[20, 450],[20, 450], [20, 450],[20, 450],[20, 450],[20, 450]]) 
-        scaler = MinMaxScaler() #initialize the scaler
+        scaler = MinMaxScaler()
         scaler.fit(xlimits.T)
         geom_to_test_norm = es.ask(cma_settings["pop_size"]) 
         #obtain the non-normalized geometries and round to nearest int
@@ -53,11 +52,9 @@ while not flag:
         #split data into chunks
         index_worker = np.int16(geom_to_test_flat.size/size)
         counts = np.array([index_worker]*size,dtype='i')
-        displacements = np.arange(0,geom_to_test_flat.size,index_worker,dtype='i')
-        #run simulations    
+        displacements = np.arange(0,geom_to_test_flat.size,index_worker,dtype='i')  
         logger_aemso.info("Working on simulations...")
-
-        results_array_costfun = np.zeros(len(geom_to_test)) #initialize an empty array for results
+        results_array_costfun = np.zeros(len(geom_to_test))
     else:
         counts = None
         displacements = None
@@ -73,11 +70,10 @@ while not flag:
     comm.Gather(results_array_costfun,all_results_array_costfun,root=0)
 
     if rank == 0:
-        #TELL: give results back to the cma optimizer
         es.tell(geom_to_test_norm, all_results_array_costfun)
         cma_logger.add()
         cma_logger.save()
-        flag = es.stop() #check if the stop criterion is met
+        flag = es.stop()
         msg = "Iteration " + str(es.countiter) + ": Best Y = " + str(es.best.f) + " at x = " + str(es.best.x)
         logger_aemso.info(msg)
         
